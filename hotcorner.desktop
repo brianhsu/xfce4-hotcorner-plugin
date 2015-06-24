@@ -1,0 +1,10 @@
+[Xfce Panel]
+Type=X-XFCE-PanelPlugin
+Encoding=UTF-8
+Name=HotCorner
+Name[zh_TW]=HotCorner
+Comment=HotCorner
+Comment[zh_TW]=HotCorner
+Icon=display
+X-XFCE-Internal=FALSE
+X-XFCE-Module=hotcorner
