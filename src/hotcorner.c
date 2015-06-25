@@ -13,9 +13,12 @@ ActionCallback get_action_callback_from_index(int index, int * outSelected) {
             return start_dashboard;
             break;
         case 2:
-            return start_screensaver;
+            return toggle_desktop;
             break;
         case 3:
+            return start_screensaver;
+            break;
+        case 4:
             return turn_off_monitor;
             break;
     }
@@ -186,6 +189,7 @@ static GtkWidget * createComboBox(const gchar *name, HotCorner * hotCorner, gint
     GtkWidget * comboBox = gtk_combo_box_text_new();
     gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(comboBox), _("-"));
     gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(comboBox), _("Xfdashboard"));
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(comboBox), _("Show Desktop"));
     gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(comboBox), _("Start Screensaver"));
     gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(comboBox), _("Turn Off Monitor"));
     gtk_combo_box_set_active(GTK_COMBO_BOX(comboBox), actionID);
