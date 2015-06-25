@@ -1,68 +1,41 @@
-#include <libxfce4panel/xfce-panel-plugin.h>
-#include <libxfce4ui/libxfce4ui.h>
 #include <stdio.h>
-
-#define UPDATE_TIMEOUT 100
-
-typedef struct {
-  guint timeout_id;
-  XfcePanelPlugin * plugin;
-  GtkWidget * label;
-  gboolean isExecuted;
-  GdkRectangle monitorInfo;
-} HotCorner;
+#include "hotcorner.h"
+#include "util.h"
 
 static void free_data(XfcePanelPlugin *plugin, HotCorner * hotCorner) {
     if (hotCorner->timeout_id != 0) {
         g_source_remove (hotCorner->timeout_id);
     }
 
-    gtk_widget_destroy(hotCorner->label);
+    gtk_widget_destroy(hotCorner->icon);
     g_free(hotCorner);
 }
 
-gboolean isUpperLeft(GdkRectangle monitorInfo, gint x, gint y) {
-    return (x == monitorInfo.x) && (y == monitorInfo.y);
-}
-
-gboolean isUpperRight(GdkRectangle monitorInfo, gint x, gint y) {
-    return (x == monitorInfo.x + monitorInfo.width - 1) && (y == monitorInfo.y);
-}
-
-gboolean isLowerRight(GdkRectangle monitorInfo, gint x, gint y) {
-    return (x == monitorInfo.x + monitorInfo.width - 1) && (y == monitorInfo.y + monitorInfo.height - 1);
-}
-
-gboolean isLowerLeft(GdkRectangle monitorInfo, gint x, gint y) {
-    return (x == monitorInfo.x) && (y == monitorInfo.y + monitorInfo.height - 1);
-}
-
-
-static gint timer_cb(HotCorner * hotCorner) {
-    GdkScreen * screen = gtk_widget_get_screen(hotCorner->label);
+static gint check_hot_corner_action(HotCorner * hotCorner) {
+    GdkScreen * screen = gtk_widget_get_screen(hotCorner->icon);
     GdkWindow * window = gdk_screen_get_root_window(screen);
-    GdkDisplay * display = gtk_widget_get_display(hotCorner->label);
+    GdkDisplay * display = gtk_widget_get_display(hotCorner->icon);
     gint x, y;
     gdk_window_get_pointer(window, &x, &y, NULL);
 
-    if (isUpperLeft(hotCorner->monitorInfo, x, y)) {
+    if (is_upper_left(hotCorner->monitorInfo, x, y) && hotCorner->upperLeftCallback != NULL) {
         if (!hotCorner->isExecuted) {
-            system("xfdashboard");
+            hotCorner->upperLeftCallback(hotCorner);
             hotCorner->isExecuted = TRUE;
         }
-    } else if (isUpperRight(hotCorner->monitorInfo, x, y)) {
+    } else if (is_upper_right(hotCorner->monitorInfo, x, y) && hotCorner->upperRightCallback != NULL) {
         if (!hotCorner->isExecuted) {
-            system("gitg &");
+            hotCorner->upperRightCallback(hotCorner);
             hotCorner->isExecuted = TRUE;
         }
-    } else if (isLowerRight(hotCorner->monitorInfo, x, y)) {
+    } else if (is_lower_right(hotCorner->monitorInfo, x, y) && hotCorner->lowerRightCallback != NULL) {
         if (!hotCorner->isExecuted) {
-            system("gqview &");
+            hotCorner->lowerRightCallback(hotCorner);
             hotCorner->isExecuted = TRUE;
         }
-    } else if (isLowerLeft(hotCorner->monitorInfo, x, y)) {
+    } else if (is_lower_left(hotCorner->monitorInfo, x, y) && hotCorner->lowerLeftCallback != NULL) {
         if (!hotCorner->isExecuted) {
-            system("evince &");
+            hotCorner->lowerLeftCallback(hotCorner);
             hotCorner->isExecuted = TRUE;
         }
     } else {
@@ -71,24 +44,38 @@ static gint timer_cb(HotCorner * hotCorner) {
     return TRUE;
 }
 
-static void start_monitor(HotCorner * hotCorner) {
+static void start_polling_mouse_position(HotCorner * hotCorner) {
     if (hotCorner->timeout_id == 0)
     {
-        hotCorner->timeout_id = g_timeout_add (UPDATE_TIMEOUT, (GSourceFunc)timer_cb, hotCorner);
+        hotCorner->timeout_id = g_timeout_add (UPDATE_TIMEOUT, (GSourceFunc)check_hot_corner_action, hotCorner);
     }
 }
 
 static HotCorner * hotCorner_new(XfcePanelPlugin *plugin) {
     HotCorner * hotCorner = g_new0(HotCorner, 1);
     hotCorner->plugin = plugin;
-    hotCorner->label = xfce_panel_image_new_from_source ("xfce4-display");
-    gtk_container_add(GTK_CONTAINER(hotCorner->plugin), hotCorner->label);
-    gtk_widget_show_all(hotCorner->label);
+    hotCorner->icon = xfce_panel_image_new_from_source ("xfce4-display");
+    hotCorner->upperLeftCallback = start_dashboard;
+    hotCorner->lowerLeftCallback = toggle_desktop;
+    hotCorner->upperRightCallback = start_screensaver;
+    hotCorner->lowerRightCallback = turn_off_monitor;
 
-    start_monitor(hotCorner);
+    gtk_container_add(GTK_CONTAINER(hotCorner->plugin), hotCorner->icon);
+    gtk_widget_show_all(hotCorner->icon);
+
+    start_polling_mouse_position(hotCorner);
 
     return hotCorner;
 }
+
+static void set_monitor_size(HotCorner * hotCorner) {
+    GdkScreen * screen = gdk_screen_get_default();
+    GdkRectangle monitorInfo;
+    gint monitorID = gdk_screen_get_primary_monitor(screen);
+    gdk_screen_get_monitor_geometry (screen, monitorID, &monitorInfo);
+    hotCorner->monitorInfo = monitorInfo;
+}
+
 
 static GtkWidget * create_layout() {
     GtkWidget * vbox = gtk_vbox_new(FALSE, 10);
@@ -155,19 +142,9 @@ static void on_open_configure_window(XfcePanelPlugin * plugin, HotCorner * hotCo
 
 }
 
-static void set_monitor_size(HotCorner * hotCorner) {
-    GdkScreen * screen = gdk_screen_get_default();
-    GdkRectangle monitorInfo;
-    gint monitorID = gdk_screen_get_primary_monitor(screen);
-    gdk_screen_get_monitor_geometry (screen, monitorID, &monitorInfo);
-    hotCorner->monitorInfo = monitorInfo;
-    printf("(%d, %d, %d, %d)\n", monitorInfo.x, monitorInfo.y, monitorInfo.width, monitorInfo.height);
-}
-
 static void on_screen_changed(GtkWidget * widget, GdkScreen * previous_screen, HotCorner * hotCorner) {
     set_monitor_size(hotCorner);
 }
-
 
 static void constructor(XfcePanelPlugin *plugin) {
     HotCorner * hotCorner = hotCorner_new(plugin);
