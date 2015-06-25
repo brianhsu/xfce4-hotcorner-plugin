@@ -1,53 +1,188 @@
 #include <libxfce4panel/xfce-panel-plugin.h>
+#include <libxfce4ui/libxfce4ui.h>
 #include <stdio.h>
 
 #define UPDATE_TIMEOUT 100
 
-guint count;
 typedef struct {
   guint timeout_id;
   XfcePanelPlugin * plugin;
   GtkWidget * label;
+  gboolean isExecuted;
+  GdkRectangle monitorInfo;
 } HotCorner;
 
-static void constructor(XfcePanelPlugin *plugin);
-XFCE_PANEL_PLUGIN_REGISTER_INTERNAL(constructor);
-
-static void free_data(XfcePanelPlugin *plugin, HotCorner * hot_corner) {
-    if (hot_corner->timeout_id != 0) {
-        g_source_remove (hot_corner->timeout_id);
+static void free_data(XfcePanelPlugin *plugin, HotCorner * hotCorner) {
+    if (hotCorner->timeout_id != 0) {
+        g_source_remove (hotCorner->timeout_id);
     }
 
-    gtk_widget_destroy(hot_corner->label);
-    g_free(hot_corner);
+    gtk_widget_destroy(hotCorner->label);
+    g_free(hotCorner);
 }
 
-static gint timer_cb(HotCorner * hot_corner) {
-    count++;
-    printf("count:%d\n", count);
+gboolean isUpperLeft(GdkRectangle monitorInfo, gint x, gint y) {
+    return (x == monitorInfo.x) && (y == monitorInfo.y);
+}
+
+gboolean isUpperRight(GdkRectangle monitorInfo, gint x, gint y) {
+    return (x == monitorInfo.x + monitorInfo.width - 1) && (y == monitorInfo.y);
+}
+
+gboolean isLowerRight(GdkRectangle monitorInfo, gint x, gint y) {
+    return (x == monitorInfo.x + monitorInfo.width - 1) && (y == monitorInfo.y + monitorInfo.height - 1);
+}
+
+gboolean isLowerLeft(GdkRectangle monitorInfo, gint x, gint y) {
+    return (x == monitorInfo.x) && (y == monitorInfo.y + monitorInfo.height - 1);
+}
+
+
+static gint timer_cb(HotCorner * hotCorner) {
+    GdkScreen * screen = gtk_widget_get_screen(hotCorner->label);
+    GdkWindow * window = gdk_screen_get_root_window(screen);
+    GdkDisplay * display = gtk_widget_get_display(hotCorner->label);
+    gint x, y;
+    gdk_window_get_pointer(window, &x, &y, NULL);
+
+    if (isUpperLeft(hotCorner->monitorInfo, x, y)) {
+        if (!hotCorner->isExecuted) {
+            system("xfdashboard");
+            hotCorner->isExecuted = TRUE;
+        }
+    } else if (isUpperRight(hotCorner->monitorInfo, x, y)) {
+        if (!hotCorner->isExecuted) {
+            system("gitg &");
+            hotCorner->isExecuted = TRUE;
+        }
+    } else if (isLowerRight(hotCorner->monitorInfo, x, y)) {
+        if (!hotCorner->isExecuted) {
+            system("gqview &");
+            hotCorner->isExecuted = TRUE;
+        }
+    } else if (isLowerLeft(hotCorner->monitorInfo, x, y)) {
+        if (!hotCorner->isExecuted) {
+            system("evince &");
+            hotCorner->isExecuted = TRUE;
+        }
+    } else {
+        hotCorner->isExecuted = FALSE;
+    }
     return TRUE;
 }
 
-static void start_monitor(HotCorner * hot_corner) {
-    if (hot_corner->timeout_id == 0)
+static void start_monitor(HotCorner * hotCorner) {
+    if (hotCorner->timeout_id == 0)
     {
-        hot_corner->timeout_id = g_timeout_add (UPDATE_TIMEOUT, (GSourceFunc)timer_cb, hot_corner);
+        hotCorner->timeout_id = g_timeout_add (UPDATE_TIMEOUT, (GSourceFunc)timer_cb, hotCorner);
     }
 }
 
-static HotCorner * hot_corner_new(XfcePanelPlugin *plugin) {
-    HotCorner * hot_corner = g_new0(HotCorner, 1);
-    hot_corner->plugin = plugin;
-    hot_corner->label = gtk_label_new("AA");
-    gtk_container_add(GTK_CONTAINER(hot_corner->plugin), hot_corner->label);
-    gtk_widget_show_all(hot_corner->label);
-    start_monitor(hot_corner);
-    return hot_corner;
+static HotCorner * hotCorner_new(XfcePanelPlugin *plugin) {
+    HotCorner * hotCorner = g_new0(HotCorner, 1);
+    hotCorner->plugin = plugin;
+    hotCorner->label = xfce_panel_image_new_from_source ("xfce4-display");
+    gtk_container_add(GTK_CONTAINER(hotCorner->plugin), hotCorner->label);
+    gtk_widget_show_all(hotCorner->label);
+
+    start_monitor(hotCorner);
+
+    return hotCorner;
 }
 
+static GtkWidget * create_layout() {
+    GtkWidget * vbox = gtk_vbox_new(FALSE, 10);
+    GtkWidget * row1 = gtk_hbox_new(FALSE, 10);
+    GtkWidget * row2 = gtk_hbox_new(FALSE, 10);
+    GtkWidget * row3 = gtk_hbox_new(FALSE, 10);
+
+    GtkWidget * label1 = gtk_label_new("UpperLeft");
+    GtkWidget * label2 = gtk_label_new("");
+    GtkWidget * label3 = gtk_label_new("UpperRight");
+    GtkWidget * label4 = gtk_label_new("");
+    GtkWidget * label5 = gtk_label_new("");
+    GtkWidget * label6 = gtk_label_new("");
+    GtkWidget * label7 = gtk_label_new("DownLeft");
+    GtkWidget * label8 = gtk_label_new("");
+    GtkWidget * label9 = gtk_label_new("DownRight");
+    GtkWidget * monitorImage = gtk_image_new_from_icon_name("xfce4-display", GTK_ICON_SIZE_BUTTON);
+
+    gtk_image_set_pixel_size(GTK_IMAGE(monitorImage), 256);
+
+    gtk_box_pack_start(GTK_BOX(row1), label1, TRUE, FALSE, TRUE);
+    gtk_box_pack_start(GTK_BOX(row1), label2, TRUE, FALSE, TRUE);
+    gtk_box_pack_start(GTK_BOX(row1), label3, TRUE, FALSE, TRUE);
+    gtk_box_pack_start(GTK_BOX(vbox), row1, FALSE, FALSE, FALSE);
+
+    gtk_box_pack_start(GTK_BOX(row2), label4, TRUE, FALSE, TRUE);
+    gtk_box_pack_start(GTK_BOX(row2), monitorImage, TRUE, TRUE, TRUE);
+    gtk_box_pack_start(GTK_BOX(row2), label6, TRUE, FALSE, TRUE);
+    gtk_box_pack_start(GTK_BOX(vbox), row2, FALSE, FALSE, FALSE);
+
+    gtk_box_pack_start(GTK_BOX(row3), label7, TRUE, FALSE, TRUE);
+    gtk_box_pack_start(GTK_BOX(row3), label8, TRUE, FALSE, TRUE);
+    gtk_box_pack_start(GTK_BOX(row3), label9, TRUE, FALSE, TRUE);
+    gtk_box_pack_start(GTK_BOX(vbox), row3, FALSE, FALSE, FALSE);
+
+    return vbox;
+}
+
+static void on_close_configure_window(GtkWidget * dialog, gint response, HotCorner * hotCorner) {
+    xfce_panel_plugin_unblock_menu(hotCorner->plugin);
+    gtk_widget_destroy(dialog);
+}
+
+static void on_open_configure_window(XfcePanelPlugin * plugin, HotCorner * hotCorner) {
+    xfce_panel_plugin_block_menu (plugin);
+    GtkWidget * dialog = xfce_titled_dialog_new_with_buttons (
+        "HotCorner",
+        GTK_WINDOW (gtk_widget_get_toplevel (GTK_WIDGET (hotCorner->plugin))),
+        GTK_DIALOG_DESTROY_WITH_PARENT,
+        GTK_STOCK_CLOSE, GTK_RESPONSE_OK, NULL
+    );
+
+    GtkWidget * vbox = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+    GtkWidget * content = create_layout();
+
+    gtk_box_pack_start(GTK_BOX(vbox), content, TRUE, FALSE, TRUE);
+
+    gtk_window_set_position (GTK_WINDOW (dialog), GTK_WIN_POS_CENTER);
+    gtk_window_set_icon_name (GTK_WINDOW (dialog), "xfce4-display");
+
+    g_signal_connect (dialog, "response", G_CALLBACK(on_close_configure_window), hotCorner);
+
+    gtk_widget_show_all(dialog);
+
+}
+
+static void set_monitor_size(HotCorner * hotCorner) {
+    GdkScreen * screen = gdk_screen_get_default();
+    GdkRectangle monitorInfo;
+    gint monitorID = gdk_screen_get_primary_monitor(screen);
+    gdk_screen_get_monitor_geometry (screen, monitorID, &monitorInfo);
+    hotCorner->monitorInfo = monitorInfo;
+    printf("(%d, %d, %d, %d)\n", monitorInfo.x, monitorInfo.y, monitorInfo.width, monitorInfo.height);
+}
+
+static void on_screen_changed(GtkWidget * widget, GdkScreen * previous_screen, HotCorner * hotCorner) {
+    set_monitor_size(hotCorner);
+}
+
+
 static void constructor(XfcePanelPlugin *plugin) {
-    HotCorner * hot_corner = hot_corner_new(plugin);
-    g_signal_connect (plugin, "free-data", G_CALLBACK (free_data), hot_corner);
+    HotCorner * hotCorner = hotCorner_new(plugin);
+
+    set_monitor_size(hotCorner);
+    xfce_panel_plugin_menu_show_configure (plugin);
+
+    GdkScreen * screen = gdk_screen_get_default();
+    g_signal_connect (plugin, "free-data", G_CALLBACK(free_data), hotCorner);
+    g_signal_connect (plugin, "configure-plugin", G_CALLBACK(on_open_configure_window), hotCorner);
+    g_signal_connect (screen, "monitors-changed", G_CALLBACK(on_screen_changed), hotCorner);
+
+
     xfce_panel_plugin_set_expand (XFCE_PANEL_PLUGIN(plugin), TRUE);
 }
+
+XFCE_PANEL_PLUGIN_REGISTER_INTERNAL(constructor);
 

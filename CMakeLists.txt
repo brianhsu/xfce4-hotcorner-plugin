@@ -1,23 +1,18 @@
-project(XFCE4_HOTCORNER_PLUGIN C)
+PROJECT(hello-world C)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+ 
+FIND_PACKAGE(PkgConfig REQUIRED)
+PKG_CHECK_MODULES(GTK REQUIRED gtk+-2.0 libxfce4panel-1.0 libxfce4ui-1)
+ 
+INCLUDE_DIRECTORIES(${GTK_INCLUDE_DIRS})
+LINK_DIRECTORIES(${GTK_LIBRARY_DIRS})
+ADD_DEFINITIONS(${GTK_CFLAGS_OTHER})
+ 
+ADD_LIBRARY(hotcorner SHARED src/hotcorner.c)
+ 
+TARGET_LINK_LIBRARIES(hotcorner ${GTK_LIBRARIES})
 
-cmake_minimum_required(VERSION 2.6)
+INSTALL(TARGETS hotcorner  LIBRARY DESTINATION lib/xfce4/panel/plugins/)
+INSTALL(FILES hotcorner.desktop DESTINATION share/xfce4/panel/plugins/)
 
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
-find_package(PkgConfig REQUIRED)
-
-pkg_check_modules(XFCE4_PANEL libxfce4panel-2.0)
-pkg_check_modules(GTK+ gtk+-3.0)
-
-include_directories(${XFCE4_PANEL_INCLUDE_DIRS})
-include_directories(${GTK+_INCLUDE_DIRS})
-
-link_directories(${XFCE4_PANEL_LIBRARY_DIRS})
-link_directories(${GTK+_LIBRARY_DIRS})
-
-add_definitions(${XFCE4_PANEL_CFLAGS_OTHER})
-add_definitions(${GTK+_CFLAGS_OTHER})
-
-add_library(hotcorner SHARED src/hotcorner.c)
-install(TARGETS hotcorner  LIBRARY DESTINATION lib/xfce4/panel/plugins/)
-install(FILES hotcorner.desktop DESTINATION share/xfce4/panel/plugins/)

@@ -1,0 +1,4 @@
+rm -rvf CMakeCache.txt  CMakeFiles  cmake_install.cmake Makefile
+cmake -DCMAKE_INSTALL_PREFIX=/usr .
+make clean
+make VERBOSE=1 install

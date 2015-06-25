@@ -3,5 +3,5 @@ CMakeFiles
 cmake_install.cmake
 libhotcorner.so
 Makefile
-.swp
+*.swp
 install_manifest.txt
