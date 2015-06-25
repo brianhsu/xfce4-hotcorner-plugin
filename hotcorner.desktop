@@ -5,6 +5,6 @@ Name=HotCorner
 Name[zh_TW]=HotCorner
 Comment=HotCorner
 Comment[zh_TW]=HotCorner
-Icon=display
+Icon=xfce4-display
 X-XFCE-Internal=FALSE
 X-XFCE-Module=hotcorner

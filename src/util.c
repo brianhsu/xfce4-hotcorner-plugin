@@ -24,14 +24,14 @@ void toggle_desktop() {
 }
 
 void turn_off_monitor() {
-    system("xset dpms force off &");
+    system("xset dpms force off");
 }
 
 void start_screensaver() {
-    system("xscreensaver-command -activate &");
+    system("xscreensaver-command -activate");
 }
 
 void start_dashboard() {
-    system("xfdashboard &");
+    system("xfdashboard");
 }
 
