@@ -1,11 +1,12 @@
-PROJECT(xfce4-hotcorner-plugin C)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+
+PROJECT(xfce4-hotcorner-plugin C)
+
+SET(VERSION 0.0.1)
  
 FIND_PACKAGE(PkgConfig REQUIRED)
 FIND_PACKAGE(Gettext REQUIRED)
 include(GNUInstallDirs)
-
-message("SSSS ${PROJECT_NAME} ${CMAKE_INSTALL_FULL_LOCALEDIR}")
 
 PKG_CHECK_MODULES(GTK REQUIRED gtk+-2.0 libxfce4panel-1.0 libxfce4ui-1 libwnck-3.0)
 

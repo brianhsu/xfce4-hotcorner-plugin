@@ -12,12 +12,19 @@ Currently it supports the following operation in primary display:
   - toggle desktop
   - start screensaver
   - turn off monitor
+  - run custom command
+
+Screenshot
+------------------------
+
+ ![Screenshot](http://i.imgur.com/575haSy.png)
 
 Prerequisite
 ------------------------
 
   - CMake
-  - XFCE 4.6
+  - libwnck >= 3.14.0
+  - xfce4-panel >= 4.12.0
 
 Compile & Installation
 -------------------------
