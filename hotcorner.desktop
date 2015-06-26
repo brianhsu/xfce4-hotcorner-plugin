@@ -2,9 +2,10 @@
 Type=X-XFCE-PanelPlugin
 Encoding=UTF-8
 Name=HotCorner
-Name[zh_TW]=HotCorner
+Name[zh_TW]=螢幕熱點
 Comment=HotCorner
-Comment[zh_TW]=HotCorner
+Comment[zh_TW]=螢幕熱點
 Icon=xfce4-display
 X-XFCE-Internal=FALSE
 X-XFCE-Module=hotcorner
+X-XFCE-Unique=true

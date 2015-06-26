@@ -7,7 +7,7 @@
 #define UPDATE_TIMEOUT 50
 
 typedef struct HotCorner HotCorner;
-typedef void (* ActionCallback)(HotCorner * hotCorner);
+typedef void (* ActionCallback)(int spot, HotCorner * hotCorner);
 
 struct HotCorner {
 
@@ -26,10 +26,21 @@ struct HotCorner {
   ActionCallback lowerLeftCallback;
   ActionCallback upperRightCallback;
   ActionCallback lowerRightCallback;
+
   gint upperLeftActionID;
   gint upperRightActionID;
   gint lowerLeftActionID;
   gint lowerRightActionID;
+
+  GtkWidget * upperLeftCommand;
+  GtkWidget * upperRightCommand;
+  GtkWidget * lowerLeftCommand;
+  GtkWidget * lowerRightCommand;
+
+  const gchar * upperLeftSavedCommand;
+  const gchar * upperRightSavedCommand;
+  const gchar * lowerLeftSavedCommand;
+  const gchar * lowerRightSavedCommand;
 
 };
 

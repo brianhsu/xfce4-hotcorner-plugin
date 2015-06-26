@@ -2,6 +2,43 @@
 #include "hotcorner.h"
 #include "util.h"
 
+#define UPPER_LEFT  0
+#define UPPER_RIGHT 1
+#define LOWER_LEFT  2
+#define LOWER_RIGHT 3
+
+void run_command(const gchar * command) {
+
+    gchar * value = g_strstrip(g_strdup(command));
+
+    if (strlen(value) > 0) {
+        system(value);
+    }
+
+    g_free(value);
+
+}
+
+void run_custom_command(int spot, HotCorner * hotCorner) {
+
+    switch (spot) {
+        case UPPER_LEFT:
+            run_command(hotCorner->upperLeftSavedCommand);
+            break;
+        case UPPER_RIGHT:
+            run_command(hotCorner->upperRightSavedCommand);
+            break;
+        case LOWER_LEFT:
+            run_command(hotCorner->lowerLeftSavedCommand);
+            break;
+        case LOWER_RIGHT:
+            run_command(hotCorner->lowerRightSavedCommand);
+            break;
+
+    }
+
+}
+
 ActionCallback get_action_callback_from_index(int index, int * outSelected) {
     *outSelected = index;
 
@@ -21,6 +58,8 @@ ActionCallback get_action_callback_from_index(int index, int * outSelected) {
         case 4:
             return turn_off_monitor;
             break;
+        case 5:
+            return run_custom_command;
     }
 
 }
@@ -30,8 +69,6 @@ static void read_config_file(XfcePanelPlugin * plugin, HotCorner * hotCorner) {
 
     if (file)
     {
-        g_free (file);
-
         XfceRc *rc = xfce_rc_simple_open (file, TRUE);
 
         if (rc != NULL)
@@ -41,6 +78,11 @@ static void read_config_file(XfcePanelPlugin * plugin, HotCorner * hotCorner) {
             hotCorner->lowerLeftActionID = xfce_rc_read_int_entry(rc, "LOWER_LEFT_ACTION_ID", 0);
             hotCorner->lowerRightActionID = xfce_rc_read_int_entry(rc, "LOWER_RIGHT_ACTION_ID", 0);
 
+            hotCorner->upperLeftSavedCommand  = g_strdup(xfce_rc_read_entry (rc, "UPPER_LEFT_COMMAND", NULL));
+            hotCorner->upperRightSavedCommand = g_strdup(xfce_rc_read_entry (rc, "UPPER_RIGHT_COMMAND", NULL));
+            hotCorner->lowerLeftSavedCommand  = g_strdup(xfce_rc_read_entry (rc, "LOWER_LEFT_COMMAND", NULL));
+            hotCorner->lowerRightSavedCommand = g_strdup(xfce_rc_read_entry (rc, "LOWER_RIGHT_COMMAND", NULL));
+
             hotCorner->upperLeftCallback = get_action_callback_from_index(hotCorner->upperLeftActionID, &(hotCorner->upperLeftActionID));
             hotCorner->upperRightCallback = get_action_callback_from_index(hotCorner->upperRightActionID, &(hotCorner->upperRightActionID));
             hotCorner->lowerLeftCallback = get_action_callback_from_index(hotCorner->lowerLeftActionID, &(hotCorner->lowerLeftActionID));
@@ -48,6 +90,8 @@ static void read_config_file(XfcePanelPlugin * plugin, HotCorner * hotCorner) {
 
             xfce_rc_close (rc);
         }
+
+        g_free (file);
     }
 
 }
@@ -56,22 +100,31 @@ static void save_config_file(XfcePanelPlugin * plugin, HotCorner * hotCorner) {
 
     gchar  *file = xfce_panel_plugin_save_location (plugin, TRUE);
 
-    if (file) {
+    hotCorner->upperLeftSavedCommand  = g_strdup(gtk_entry_get_text(GTK_ENTRY(hotCorner->upperLeftCommand)));
+    hotCorner->upperRightSavedCommand = g_strdup(gtk_entry_get_text(GTK_ENTRY(hotCorner->upperRightCommand)));
+    hotCorner->lowerLeftSavedCommand  = g_strdup(gtk_entry_get_text(GTK_ENTRY(hotCorner->lowerLeftCommand)));
+    hotCorner->lowerRightSavedCommand = g_strdup(gtk_entry_get_text(GTK_ENTRY(hotCorner->lowerRightCommand)));
 
-        g_free(file);
+    if (file) {
 
         XfceRc * rc = xfce_rc_simple_open (file, FALSE);
 
-        if (!rc) {
-            return;
+        if (rc) {
+            xfce_rc_write_int_entry (rc, "UPPER_LEFT_ACTION_ID", hotCorner->upperLeftActionID);
+            xfce_rc_write_int_entry (rc, "UPPER_RIGHT_ACTION_ID", hotCorner->upperRightActionID);
+            xfce_rc_write_int_entry (rc, "LOWER_LEFT_ACTION_ID", hotCorner->lowerLeftActionID);
+            xfce_rc_write_int_entry (rc, "LOWER_RIGHT_ACTION_ID", hotCorner->lowerRightActionID);
+
+            xfce_rc_write_entry (rc, "UPPER_LEFT_COMMAND",  gtk_entry_get_text(GTK_ENTRY(hotCorner->upperLeftCommand)));
+            xfce_rc_write_entry (rc, "UPPER_RIGHT_COMMAND", gtk_entry_get_text(GTK_ENTRY(hotCorner->upperRightCommand)));
+            xfce_rc_write_entry (rc, "LOWER_LEFT_COMMAND",  gtk_entry_get_text(GTK_ENTRY(hotCorner->lowerLeftCommand)));
+            xfce_rc_write_entry (rc, "LOWER_RIGHT_COMMAND", gtk_entry_get_text(GTK_ENTRY(hotCorner->lowerRightCommand)));
+
+            xfce_rc_close (rc);
         }
 
-        xfce_rc_write_int_entry (rc, "UPPER_LEFT_ACTION_ID", hotCorner->upperLeftActionID);
-        xfce_rc_write_int_entry (rc, "UPPER_RIGHT_ACTION_ID", hotCorner->upperRightActionID);
-        xfce_rc_write_int_entry (rc, "LOWER_LEFT_ACTION_ID", hotCorner->lowerLeftActionID);
-        xfce_rc_write_int_entry (rc, "LOWER_RIGHT_ACTION_ID", hotCorner->lowerRightActionID);
+        g_free(file);
 
-        xfce_rc_close (rc);
     }
 }
 
@@ -95,26 +148,26 @@ static gint check_hot_corner_action(HotCorner * hotCorner) {
     if (is_upper_left(hotCorner->monitorInfo, x, y) && hotCorner->upperLeftCallback != NULL) {
         hotCorner->ticket++;
         if (!hotCorner->isExecuted && hotCorner->ticket >= 5) {
-            hotCorner->upperLeftCallback(hotCorner);
+            hotCorner->upperLeftCallback(UPPER_LEFT, hotCorner);
             hotCorner->isExecuted = TRUE;
         }
     } else if (is_upper_right(hotCorner->monitorInfo, x, y) && hotCorner->upperRightCallback != NULL) {
         hotCorner->ticket++;
         if (!hotCorner->isExecuted && hotCorner->ticket >= 5) {
-            hotCorner->upperRightCallback(hotCorner);
+            hotCorner->upperRightCallback(UPPER_RIGHT, hotCorner);
             hotCorner->isExecuted = TRUE;
         }
     } else if (is_lower_right(hotCorner->monitorInfo, x, y) && hotCorner->lowerRightCallback != NULL) {
         hotCorner->ticket++;
         if (!hotCorner->isExecuted && hotCorner->ticket >= 5) {
-            hotCorner->lowerRightCallback(hotCorner);
+            hotCorner->lowerRightCallback(LOWER_RIGHT, hotCorner);
             hotCorner->isExecuted = TRUE;
         }
 
     } else if (is_lower_left(hotCorner->monitorInfo, x, y) && hotCorner->lowerLeftCallback != NULL) {
         hotCorner->ticket++;
         if (!hotCorner->isExecuted && hotCorner->ticket >= 5) {
-            hotCorner->lowerLeftCallback(hotCorner);
+            hotCorner->lowerLeftCallback(LOWER_LEFT, hotCorner);
             hotCorner->isExecuted = TRUE;
         }
     } else {
@@ -139,6 +192,10 @@ static HotCorner * hotCorner_new(XfcePanelPlugin *plugin) {
     hotCorner->lowerLeftCallback  = NULL;
     hotCorner->upperRightCallback = NULL;
     hotCorner->lowerRightCallback = NULL;
+    hotCorner->upperLeftCommand  = NULL;
+    hotCorner->lowerLeftCommand  = NULL;
+    hotCorner->upperRightCommand = NULL;
+    hotCorner->lowerRightCommand = NULL;
     hotCorner->upperLeftActionID = 0;
     hotCorner->upperRightActionID = 0;
     hotCorner->lowerLeftActionID = 0;
@@ -166,6 +223,39 @@ ActionCallback get_action_callback(GtkComboBox * comboBox, int * outSelected) {
     return get_action_callback_from_index(selected, outSelected);
 }
 
+static void set_new_entry_visibility(GtkComboBox * comboBox, GtkWidget * entry) {
+    gint selected = gtk_combo_box_get_active(comboBox);
+
+    if (selected != 5) {
+        gtk_widget_set_no_show_all(entry, TRUE);
+        gtk_widget_hide(entry);
+    } else {
+        gtk_widget_set_no_show_all(entry, FALSE);
+        gtk_widget_show(entry);
+    }
+
+}
+
+static void set_corner_command_entry(GtkWidget * entry, HotCorner * hotCorner) {
+
+    const gchar * name = gtk_widget_get_name(GTK_WIDGET(entry));
+
+    if (g_strcmp0(name, "UPPER_LEFT") == 0) {
+        hotCorner->upperLeftCommand = entry;
+        gtk_entry_set_text(GTK_ENTRY(entry), hotCorner->upperLeftSavedCommand);
+    } else if (g_strcmp0(name, "UPPER_RIGHT") == 0) {
+        hotCorner->upperRightCommand = entry;
+        gtk_entry_set_text(GTK_ENTRY(entry), hotCorner->upperRightSavedCommand);
+    } else if (g_strcmp0(name, "LOWER_LEFT") == 0) {
+        hotCorner->lowerLeftCommand = entry;
+        gtk_entry_set_text(GTK_ENTRY(entry), hotCorner->lowerLeftSavedCommand);
+    } else if (g_strcmp0(name, "LOWER_RIGHT") == 0) {
+        hotCorner->lowerRightCommand = entry;
+        gtk_entry_set_text(GTK_ENTRY(entry), hotCorner->lowerRightSavedCommand);
+    }
+
+}
+
 static void on_combo_box_changed(GtkComboBox * comboBox, HotCorner * hotCorner) {
 
     const gchar * name = gtk_widget_get_name(GTK_WIDGET(comboBox));
@@ -186,23 +276,41 @@ static void on_combo_box_changed(GtkComboBox * comboBox, HotCorner * hotCorner) 
 }
 
 static GtkWidget * createComboBox(const gchar *name, HotCorner * hotCorner, gint actionID) {
+
+    GtkWidget * vbox = gtk_vbox_new(FALSE, 5);
+    GtkWidget * entry = gtk_entry_new();
     GtkWidget * comboBox = gtk_combo_box_text_new();
+
+    gtk_widget_set_name(comboBox, name);
+    gtk_widget_set_name(entry, name);
+
+
     gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(comboBox), _("-"));
     gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(comboBox), _("Xfdashboard"));
     gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(comboBox), _("Show Desktop"));
     gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(comboBox), _("Start Screensaver"));
     gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(comboBox), _("Turn Off Monitor"));
-    gtk_combo_box_set_active(GTK_COMBO_BOX(comboBox), actionID);
-    gtk_widget_set_name(comboBox, name);
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(comboBox), _("Custom Command"));
 
+    gtk_combo_box_set_active(GTK_COMBO_BOX(comboBox), actionID);
+    
+    gint selected = gtk_combo_box_get_active(GTK_COMBO_BOX(comboBox));
+    set_new_entry_visibility(GTK_COMBO_BOX(comboBox), entry);
+
+    gtk_box_pack_start(GTK_BOX(vbox), comboBox, TRUE, FALSE, TRUE);
+    gtk_box_pack_start(GTK_BOX(vbox), entry, TRUE, FALSE, TRUE);
+
+    set_corner_command_entry(entry, hotCorner);
 
     g_signal_connect (comboBox, "changed", G_CALLBACK(on_combo_box_changed), hotCorner);
+    g_signal_connect (comboBox, "changed", G_CALLBACK(set_new_entry_visibility), entry);
 
-    return comboBox;
+    return vbox;
 }
 
 
 static GtkWidget * create_layout(HotCorner * hotCorner) {
+
     GtkWidget * vbox = gtk_vbox_new(FALSE, 10);
     GtkWidget * row1 = gtk_hbox_new(FALSE, 10);
     GtkWidget * row2 = gtk_hbox_new(FALSE, 10);
@@ -243,6 +351,7 @@ static void on_close_configure_window(GtkWidget * dialog, gint response, HotCorn
 }
 
 static void on_open_configure_window(XfcePanelPlugin * plugin, HotCorner * hotCorner) {
+
     xfce_panel_plugin_block_menu (plugin);
     GtkWidget * dialog = xfce_titled_dialog_new_with_buttons (
         _("HotCorner"),
@@ -271,9 +380,10 @@ static void on_screen_changed(GtkWidget * widget, GdkScreen * previous_screen, H
 
 static void constructor(XfcePanelPlugin *plugin) {
     HotCorner * hotCorner = hotCorner_new(plugin);
-
+    xfce_textdomain(GETTEXT_PACKAGE, LOCALEDIR, "UTF-8");
     set_monitor_size(hotCorner);
     xfce_panel_plugin_menu_show_configure (plugin);
+
 
     GdkScreen * screen = gdk_screen_get_default();
     g_signal_connect (plugin, "free-data", G_CALLBACK(free_data), hotCorner);
@@ -281,8 +391,10 @@ static void constructor(XfcePanelPlugin *plugin) {
     g_signal_connect (screen, "monitors-changed", G_CALLBACK(on_screen_changed), hotCorner);
     g_signal_connect (plugin, "save", G_CALLBACK(save_config_file), hotCorner);
 
-    xfce_panel_plugin_set_expand (XFCE_PANEL_PLUGIN(plugin), TRUE);
+
     read_config_file(plugin, hotCorner);
+
+    xfce_panel_plugin_set_expand (XFCE_PANEL_PLUGIN(plugin), TRUE);
 
 }
 
