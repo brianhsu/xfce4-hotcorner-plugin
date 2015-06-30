@@ -30,7 +30,7 @@ Compile & Installation
 -------------------------
 
 ```console
-  git clone git@github.com:brianhsu/xfce4-hotcorner-plugin.git
+  git clone git://github.com/brianhsu/xfce4-hotcorner-plugin.git
   cd xfce4-hotcorner-plugin
   cmake -DCMAKE_INSTALL_PREFIX=/usr .
   make install
