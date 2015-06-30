@@ -91,6 +91,7 @@ static void read_config_file(XfcePanelPlugin * plugin, HotCorner * hotCorner) {
 
         if (rc != NULL)
         {
+            hotCorner->disableWhenFullScreen = xfce_rc_read_int_entry(rc, "DISABLE_WHEN_FULL_SCREEN", FALSE);
             hotCorner->upperLeftActionID = xfce_rc_read_int_entry(rc, "UPPER_LEFT_ACTION_ID", 0);
             hotCorner->upperRightActionID = xfce_rc_read_int_entry(rc, "UPPER_RIGHT_ACTION_ID", 0);
             hotCorner->lowerLeftActionID = xfce_rc_read_int_entry(rc, "LOWER_LEFT_ACTION_ID", 0);
@@ -133,6 +134,8 @@ static void save_config_file(XfcePanelPlugin * plugin, HotCorner * hotCorner) {
             xfce_rc_write_int_entry (rc, "LOWER_LEFT_ACTION_ID", hotCorner->lowerLeftActionID);
             xfce_rc_write_int_entry (rc, "LOWER_RIGHT_ACTION_ID", hotCorner->lowerRightActionID);
 
+            xfce_rc_write_int_entry (rc, "DISABLE_WHEN_FULL_SCREEN", hotCorner->disableWhenFullScreen);
+
             xfce_rc_write_entry (rc, "UPPER_LEFT_COMMAND",  gtk_entry_get_text(GTK_ENTRY(hotCorner->upperLeftCommand)));
             xfce_rc_write_entry (rc, "UPPER_RIGHT_COMMAND", gtk_entry_get_text(GTK_ENTRY(hotCorner->upperRightCommand)));
             xfce_rc_write_entry (rc, "LOWER_LEFT_COMMAND",  gtk_entry_get_text(GTK_ENTRY(hotCorner->lowerLeftCommand)));
@@ -162,6 +165,14 @@ static gint check_hot_corner_action(HotCorner * hotCorner) {
     GdkDisplay * display = gtk_widget_get_display(hotCorner->icon);
     gint x, y;
     gdk_window_get_pointer(window, &x, &y, NULL);
+
+    if (hotCorner->disableWhenFullScreen) {
+        WnckScreen * wnckScreen = wnck_screen_get_default();
+        WnckWindow * activeWindow = wnck_screen_get_active_window(wnckScreen);
+        if (wnck_window_is_fullscreen(activeWindow)) {
+            return TRUE;
+        }
+    }
 
     if (is_upper_left(hotCorner->monitorInfo, x, y) && hotCorner->upperLeftCallback != NULL) {
         hotCorner->ticket++;
@@ -206,6 +217,7 @@ static HotCorner * hotCorner_new(XfcePanelPlugin *plugin) {
     HotCorner * hotCorner = g_new0(HotCorner, 1);
     hotCorner->plugin = plugin;
     hotCorner->icon = xfce_panel_image_new_from_source ("xfce4-display");
+    hotCorner->disableWhenFullScreen = TRUE;
     hotCorner->upperLeftCallback  = NULL;
     hotCorner->lowerLeftCallback  = NULL;
     hotCorner->upperRightCallback = NULL;
@@ -368,6 +380,11 @@ static void on_close_configure_window(GtkWidget * dialog, gint response, HotCorn
     gtk_widget_destroy(dialog);
 }
 
+static void setFullScreenDisableFlag(GtkToggleButton *toggleButton, HotCorner * hotCorner) {
+    hotCorner->disableWhenFullScreen = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggleButton));
+}
+
+
 static void on_open_configure_window(XfcePanelPlugin * plugin, HotCorner * hotCorner) {
 
     xfce_panel_plugin_block_menu (plugin);
@@ -379,18 +396,24 @@ static void on_open_configure_window(XfcePanelPlugin * plugin, HotCorner * hotCo
     );
 
     GtkWidget * vbox = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+    GtkWidget * disableInFullScreenCheckbox = gtk_check_button_new_with_label(_("Disable when active window is full screen"));
     GtkWidget * content = create_layout(hotCorner);
 
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(disableInFullScreenCheckbox), hotCorner->disableWhenFullScreen);
+
     gtk_box_pack_start(GTK_BOX(vbox), content, TRUE, FALSE, TRUE);
+    gtk_box_pack_start(GTK_BOX(vbox), disableInFullScreenCheckbox, TRUE, FALSE, TRUE);
 
     gtk_window_set_position (GTK_WINDOW (dialog), GTK_WIN_POS_CENTER);
     gtk_window_set_icon_name (GTK_WINDOW (dialog), "xfce4-display");
 
     g_signal_connect (dialog, "response", G_CALLBACK(on_close_configure_window), hotCorner);
+    g_signal_connect (disableInFullScreenCheckbox, "toggled", G_CALLBACK(setFullScreenDisableFlag), hotCorner);
 
     gtk_widget_show_all(dialog);
 
 }
+
 
 static void on_screen_changed(GtkWidget * widget, GdkScreen * previous_screen, HotCorner * hotCorner) {
     set_monitor_size(hotCorner);
@@ -412,7 +435,7 @@ static void constructor(XfcePanelPlugin *plugin) {
 
     read_config_file(plugin, hotCorner);
 
-    xfce_panel_plugin_set_expand (XFCE_PANEL_PLUGIN(plugin), TRUE);
+    xfce_panel_plugin_set_expand (XFCE_PANEL_PLUGIN(plugin), FALSE);
 
 }
 

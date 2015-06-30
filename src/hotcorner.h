@@ -21,6 +21,7 @@
 
 #include <libxfce4panel/xfce-panel-plugin.h>
 #include <libxfce4ui/libxfce4ui.h>
+#include <libwnck/libwnck.h>
 
 #define UPDATE_TIMEOUT 50
 
@@ -49,6 +50,7 @@ struct HotCorner {
   gint upperRightActionID;
   gint lowerLeftActionID;
   gint lowerRightActionID;
+  gboolean disableWhenFullScreen;
 
   GtkWidget * upperLeftCommand;
   GtkWidget * upperRightCommand;

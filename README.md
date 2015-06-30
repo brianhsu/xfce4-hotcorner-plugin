@@ -36,3 +36,18 @@ Compile & Installation
   make install
 ```
 
+Installation
+----------------------
+
+  - ArchLinux AUR: 
+    - https://aur4.archlinux.org/packages/xfce4-hotcorner-plugin
+
+  - Gentoo Ebuild: 
+    - https://gist.github.com/brianhsu/637a906e9a1e17ca6392
+
+License
+-----------
+
+Licensed under [GNU GPL v2][0] or (at your option) any later version..
+
+[0]: https://www.gnu.org/licenses/gpl-2.0.html

@@ -6,41 +6,45 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: xfce4-hotcorner-plugin\n"
+"Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-06-26 15:00+0800\n"
+"POT-Creation-Date: 2015-06-30 15:57+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../src/hotcorner.c:288
+#: hotcorner.c:318
 msgid "-"
 msgstr ""
 
-#: ../src/hotcorner.c:289
-msgid "Xfdashboard"
-msgstr ""
-
-#: ../src/hotcorner.c:290
-msgid "Show Desktop"
-msgstr ""
-
-#: ../src/hotcorner.c:291
-msgid "Start Screensaver"
-msgstr ""
-
-#: ../src/hotcorner.c:292
-msgid "Turn Off Monitor"
-msgstr ""
-
-#: ../src/hotcorner.c:293
+#: hotcorner.c:323
 msgid "Custom Command"
 msgstr ""
 
-#: ../src/hotcorner.c:357
+#: hotcorner.c:399
+msgid "Disable when active window is full screen"
+msgstr ""
+
+#: hotcorner.c:392
 msgid "HotCorner"
+msgstr ""
+
+#: hotcorner.c:320
+msgid "Show Desktop"
+msgstr ""
+
+#: hotcorner.c:321
+msgid "Start Screensaver"
+msgstr ""
+
+#: hotcorner.c:322
+msgid "Turn Off Monitor"
+msgstr ""
+
+#: hotcorner.c:319
+msgid "Xfdashboard"
 msgstr ""
