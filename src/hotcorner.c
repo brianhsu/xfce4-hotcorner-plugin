@@ -35,7 +35,6 @@ void run_custom_command(int spot, HotCorner * hotCorner);
 struct command_text_callback_map_entry command_text_callback_map[] = {
     {"-", NULL},
     {"Xfdashboard", start_dashboard},
-    {"Show Desktop", toggle_desktop},
     {"Start Screensaver", start_screensaver},
     {"Turn Off Monitor", turn_off_monitor},
     {"Custom Command", run_custom_command},
