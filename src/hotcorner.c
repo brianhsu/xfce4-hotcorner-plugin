@@ -216,7 +216,7 @@ static void start_polling_mouse_position(HotCorner * hotCorner) {
 static HotCorner * hotCorner_new(XfcePanelPlugin *plugin) {
     HotCorner * hotCorner = g_new0(HotCorner, 1);
     hotCorner->plugin = plugin;
-    hotCorner->icon = xfce_panel_image_new_from_source ("xfce4-display");
+    hotCorner->icon = xfce_panel_image_new_from_source ("video-display");
     hotCorner->disableWhenFullScreen = TRUE;
     hotCorner->upperLeftCallback  = NULL;
     hotCorner->lowerLeftCallback  = NULL;
@@ -352,7 +352,7 @@ static GtkWidget * create_layout(HotCorner * hotCorner) {
     GtkWidget * lowerRightCombo = createComboBox("LOWER_RIGHT", hotCorner, hotCorner->lowerRightActionID);
 
     GtkWidget * emptyLabel = gtk_label_new("");
-    GtkWidget * monitorImage = gtk_image_new_from_icon_name("xfce4-display", GTK_ICON_SIZE_BUTTON);
+    GtkWidget * monitorImage = gtk_image_new_from_icon_name("video-display", GTK_ICON_SIZE_BUTTON);
 
     gtk_image_set_pixel_size(GTK_IMAGE(monitorImage), 256);
 
@@ -405,7 +405,7 @@ static void on_open_configure_window(XfcePanelPlugin * plugin, HotCorner * hotCo
     gtk_box_pack_start(GTK_BOX(vbox), disableInFullScreenCheckbox, TRUE, FALSE, TRUE);
 
     gtk_window_set_position (GTK_WINDOW (dialog), GTK_WIN_POS_CENTER);
-    gtk_window_set_icon_name (GTK_WINDOW (dialog), "xfce4-display");
+    gtk_window_set_icon_name (GTK_WINDOW (dialog), "video-display");
 
     g_signal_connect (dialog, "response", G_CALLBACK(on_close_configure_window), hotCorner);
     g_signal_connect (disableInFullScreenCheckbox, "toggled", G_CALLBACK(setFullScreenDisableFlag), hotCorner);
