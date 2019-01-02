@@ -216,7 +216,7 @@ static void start_polling_mouse_position(HotCorner * hotCorner) {
 static HotCorner * hotCorner_new(XfcePanelPlugin *plugin) {
     HotCorner * hotCorner = g_new0(HotCorner, 1);
     hotCorner->plugin = plugin;
-    hotCorner->icon = xfce_panel_image_new_from_source ("video-display");
+    hotCorner->icon = gtk_image_new_from_icon_name("video-display", GTK_ICON_SIZE_BUTTON);
     hotCorner->disableWhenFullScreen = TRUE;
     hotCorner->upperLeftCallback  = NULL;
     hotCorner->lowerLeftCallback  = NULL;
