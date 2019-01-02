@@ -25,6 +25,22 @@
 #define LOWER_LEFT  2
 #define LOWER_RIGHT 3
 
+struct command_text_callback_map_entry {
+    const char *entry_text;
+    ActionCallback entry_cb;
+};
+
+void run_custom_command(int spot, HotCorner * hotCorner);
+
+struct command_text_callback_map_entry command_text_callback_map[] = {
+    {"-", NULL},
+    {"Xfdashboard", start_dashboard},
+    {"Show Desktop", toggle_desktop},
+    {"Start Screensaver", start_screensaver},
+    {"Turn Off Monitor", turn_off_monitor},
+    {"Custom Command", run_custom_command},
+};
+
 void run_command(const gchar * command) {
 
     gchar * value = g_strstrip(g_strdup(command));
@@ -60,26 +76,11 @@ void run_custom_command(int spot, HotCorner * hotCorner) {
 ActionCallback get_action_callback_from_index(int index, int * outSelected) {
     *outSelected = index;
 
-    switch (index) {
-        case 0:
-            return NULL;
-            break;
-        case 1:
-            return start_dashboard;
-            break;
-        case 2:
-            return toggle_desktop;
-            break;
-        case 3:
-            return start_screensaver;
-            break;
-        case 4:
-            return turn_off_monitor;
-            break;
-        case 5:
-            return run_custom_command;
+    if (index >= ARRAY_SIZEOF(command_text_callback_map)) {
+        return NULL;
     }
 
+    return command_text_callback_map[index].entry_cb;
 }
 
 static void read_config_file(XfcePanelPlugin * plugin, HotCorner * hotCorner) {
@@ -305,21 +306,18 @@ static void on_combo_box_changed(GtkComboBox * comboBox, HotCorner * hotCorner) 
 }
 
 static GtkWidget * createComboBox(const gchar *name, HotCorner * hotCorner, gint actionID) {
-
     GtkWidget * vbox = gtk_vbox_new(FALSE, 5);
     GtkWidget * entry = gtk_entry_new();
     GtkWidget * comboBox = gtk_combo_box_text_new();
+    size_t i;
 
     gtk_widget_set_name(comboBox, name);
     gtk_widget_set_name(entry, name);
 
-
-    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(comboBox), _("-"));
-    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(comboBox), _("Xfdashboard"));
-    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(comboBox), _("Show Desktop"));
-    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(comboBox), _("Start Screensaver"));
-    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(comboBox), _("Turn Off Monitor"));
-    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(comboBox), _("Custom Command"));
+    for (i = 0; i < ARRAY_SIZEOF(command_text_callback_map); i++) {
+        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(comboBox),
+                                       command_text_callback_map[i].entry_text);
+    }
 
     gtk_combo_box_set_active(GTK_COMBO_BOX(comboBox), actionID);
     

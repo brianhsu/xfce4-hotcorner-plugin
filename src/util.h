@@ -22,6 +22,8 @@
 #include <gtk/gtk.h>
 #include "hotcorner.h"
 
+#define ARRAY_SIZEOF(_x) (sizeof((_x))/sizeof((_x)[0]))
+
 gboolean is_upper_left(GdkRectangle monitorInfo, gint x, gint y);
 gboolean is_upper_right(GdkRectangle monitorInfo, gint x, gint y);
 gboolean is_lower_right(GdkRectangle monitorInfo, gint x, gint y);
