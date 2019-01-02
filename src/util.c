@@ -16,7 +16,6 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#include <libwnck/libwnck.h>
 #include "util.h"
 
 gboolean is_upper_left(GdkRectangle monitorInfo, gint x, gint y) {

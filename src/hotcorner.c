@@ -243,7 +243,7 @@ ActionCallback get_action_callback(GtkComboBox * comboBox, int * outSelected) {
 static void set_new_entry_visibility(GtkComboBox * comboBox, GtkWidget * entry) {
     gint selected = gtk_combo_box_get_active(comboBox);
 
-    if (selected != 5) {
+    if (command_text_callback_map[selected].entry_cb != run_custom_command) {
         gtk_widget_set_no_show_all(entry, TRUE);
         gtk_widget_hide(entry);
     } else {
@@ -292,8 +292,10 @@ static void on_combo_box_changed(GtkComboBox * comboBox, HotCorner * hotCorner) 
 
 }
 
-static GtkWidget * createComboBox(const gchar *name, HotCorner * hotCorner, gint actionID) {
-    GtkWidget * vbox = gtk_vbox_new(FALSE, 5);
+static GtkWidget * createComboBox(const gchar *name, HotCorner * hotCorner,
+                                  gint actionID) {
+    GtkWidget * vbox = gtk_vbox_new(FALSE,
+                                    ARRAY_SIZEOF(command_text_callback_map));
     GtkWidget * entry = gtk_entry_new();
     GtkWidget * comboBox = gtk_combo_box_text_new();
     size_t i;
