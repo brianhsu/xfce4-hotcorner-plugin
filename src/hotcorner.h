@@ -50,7 +50,6 @@ struct HotCorner {
   gint upperRightActionID;
   gint lowerLeftActionID;
   gint lowerRightActionID;
-  gboolean disableWhenFullScreen;
 
   GtkWidget * upperLeftCommand;
   GtkWidget * upperRightCommand;
