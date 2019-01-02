@@ -162,7 +162,6 @@ static void free_data(XfcePanelPlugin *plugin, HotCorner * hotCorner) {
 static gint check_hot_corner_action(HotCorner * hotCorner) {
     GdkScreen * screen = gtk_widget_get_screen(hotCorner->icon);
     GdkWindow * window = gdk_screen_get_root_window(screen);
-    GdkDisplay * display = gtk_widget_get_display(hotCorner->icon);
     gint x, y;
     gdk_window_get_pointer(window, &x, &y, NULL);
 
@@ -217,7 +216,7 @@ static HotCorner * hotCorner_new(XfcePanelPlugin *plugin) {
     HotCorner * hotCorner = g_new0(HotCorner, 1);
     hotCorner->plugin = plugin;
     hotCorner->icon = gtk_image_new_from_icon_name("video-display", GTK_ICON_SIZE_BUTTON);
-    hotCorner->disableWhenFullScreen = TRUE;
+    hotCorner->disableWhenFullScreen = FALSE;
     hotCorner->upperLeftCallback  = NULL;
     hotCorner->lowerLeftCallback  = NULL;
     hotCorner->upperRightCallback = NULL;
@@ -398,8 +397,6 @@ static void on_open_configure_window(XfcePanelPlugin * plugin, HotCorner * hotCo
     GtkWidget * vbox = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
     GtkWidget * disableInFullScreenCheckbox = gtk_check_button_new_with_label(_("Disable when active window is full screen"));
     GtkWidget * content = create_layout(hotCorner);
-
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(disableInFullScreenCheckbox), hotCorner->disableWhenFullScreen);
 
     gtk_box_pack_start(GTK_BOX(vbox), content, TRUE, FALSE, TRUE);
     gtk_box_pack_start(GTK_BOX(vbox), disableInFullScreenCheckbox, TRUE, FALSE, TRUE);
