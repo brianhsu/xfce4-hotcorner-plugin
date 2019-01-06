@@ -310,7 +310,6 @@ static GtkWidget * createComboBox(const gchar *name, HotCorner * hotCorner,
 
     gtk_combo_box_set_active(GTK_COMBO_BOX(comboBox), actionID);
     
-    gint selected = gtk_combo_box_get_active(GTK_COMBO_BOX(comboBox));
     set_new_entry_visibility(GTK_COMBO_BOX(comboBox), entry);
 
     gtk_box_pack_start(GTK_BOX(vbox), comboBox, TRUE, FALSE, TRUE);
