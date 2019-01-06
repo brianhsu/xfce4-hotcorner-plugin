@@ -9,7 +9,6 @@ This is aim to provide an easy to use xfce4 panel plugin that let users set hot 
 Currently it supports the following operation in primary display:
 
   - xfdashboard
-  - toggle desktop
   - start screensaver
   - turn off monitor
   - run custom command
@@ -23,7 +22,6 @@ Prerequisite
 ------------------------
 
   - CMake
-  - libwnck >= 3.14.0
   - xfce4-panel >= 4.12.0
 
 Compile & Installation
