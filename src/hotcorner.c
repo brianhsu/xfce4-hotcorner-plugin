@@ -305,7 +305,7 @@ static GtkWidget * createComboBox(const gchar *name, HotCorner * hotCorner,
 
     for (i = 0; i < ARRAY_SIZEOF(command_text_callback_map); i++) {
         gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(comboBox),
-                                       command_text_callback_map[i].entry_text);
+                                       _(command_text_callback_map[i].entry_text));
     }
 
     gtk_combo_box_set_active(GTK_COMBO_BOX(comboBox), actionID);
