@@ -22,11 +22,12 @@
 #include <gtk/gtk.h>
 #include "hotcorner.h"
 
+#define ARRAY_SIZEOF(_x) (sizeof((_x))/sizeof((_x)[0]))
+
 gboolean is_upper_left(GdkRectangle monitorInfo, gint x, gint y);
 gboolean is_upper_right(GdkRectangle monitorInfo, gint x, gint y);
 gboolean is_lower_right(GdkRectangle monitorInfo, gint x, gint y);
 gboolean is_lower_left(GdkRectangle monitorInfo, gint x, gint y);
-void toggle_desktop(int spot, HotCorner * hotCorenr);
 void turn_off_monitor(int spot, HotCorner * hotCorner);
 void start_screensaver(int spot, HotCorner * hotCorner);
 void start_dashboard(int spot, HotCorner * hotCorner);

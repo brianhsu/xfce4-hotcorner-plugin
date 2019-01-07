@@ -25,6 +25,21 @@
 #define LOWER_LEFT  2
 #define LOWER_RIGHT 3
 
+struct command_text_callback_map_entry {
+    const char *entry_text;
+    ActionCallback entry_cb;
+};
+
+void run_custom_command(int spot, HotCorner * hotCorner);
+
+struct command_text_callback_map_entry command_text_callback_map[] = {
+    {"-", NULL},
+    {"Xfdashboard", start_dashboard},
+    {"Start Screensaver", start_screensaver},
+    {"Turn Off Monitor", turn_off_monitor},
+    {"Custom Command", run_custom_command},
+};
+
 void run_command(const gchar * command) {
 
     gchar * value = g_strstrip(g_strdup(command));
@@ -60,26 +75,11 @@ void run_custom_command(int spot, HotCorner * hotCorner) {
 ActionCallback get_action_callback_from_index(int index, int * outSelected) {
     *outSelected = index;
 
-    switch (index) {
-        case 0:
-            return NULL;
-            break;
-        case 1:
-            return start_dashboard;
-            break;
-        case 2:
-            return toggle_desktop;
-            break;
-        case 3:
-            return start_screensaver;
-            break;
-        case 4:
-            return turn_off_monitor;
-            break;
-        case 5:
-            return run_custom_command;
+    if (index >= ARRAY_SIZEOF(command_text_callback_map)) {
+        return NULL;
     }
 
+    return command_text_callback_map[index].entry_cb;
 }
 
 static void read_config_file(XfcePanelPlugin * plugin, HotCorner * hotCorner) {
@@ -91,7 +91,6 @@ static void read_config_file(XfcePanelPlugin * plugin, HotCorner * hotCorner) {
 
         if (rc != NULL)
         {
-            hotCorner->disableWhenFullScreen = xfce_rc_read_int_entry(rc, "DISABLE_WHEN_FULL_SCREEN", FALSE);
             hotCorner->upperLeftActionID = xfce_rc_read_int_entry(rc, "UPPER_LEFT_ACTION_ID", 0);
             hotCorner->upperRightActionID = xfce_rc_read_int_entry(rc, "UPPER_RIGHT_ACTION_ID", 0);
             hotCorner->lowerLeftActionID = xfce_rc_read_int_entry(rc, "LOWER_LEFT_ACTION_ID", 0);
@@ -134,8 +133,6 @@ static void save_config_file(XfcePanelPlugin * plugin, HotCorner * hotCorner) {
             xfce_rc_write_int_entry (rc, "LOWER_LEFT_ACTION_ID", hotCorner->lowerLeftActionID);
             xfce_rc_write_int_entry (rc, "LOWER_RIGHT_ACTION_ID", hotCorner->lowerRightActionID);
 
-            xfce_rc_write_int_entry (rc, "DISABLE_WHEN_FULL_SCREEN", hotCorner->disableWhenFullScreen);
-
             xfce_rc_write_entry (rc, "UPPER_LEFT_COMMAND",  gtk_entry_get_text(GTK_ENTRY(hotCorner->upperLeftCommand)));
             xfce_rc_write_entry (rc, "UPPER_RIGHT_COMMAND", gtk_entry_get_text(GTK_ENTRY(hotCorner->upperRightCommand)));
             xfce_rc_write_entry (rc, "LOWER_LEFT_COMMAND",  gtk_entry_get_text(GTK_ENTRY(hotCorner->lowerLeftCommand)));
@@ -162,17 +159,8 @@ static void free_data(XfcePanelPlugin *plugin, HotCorner * hotCorner) {
 static gint check_hot_corner_action(HotCorner * hotCorner) {
     GdkScreen * screen = gtk_widget_get_screen(hotCorner->icon);
     GdkWindow * window = gdk_screen_get_root_window(screen);
-    GdkDisplay * display = gtk_widget_get_display(hotCorner->icon);
     gint x, y;
     gdk_window_get_pointer(window, &x, &y, NULL);
-
-    if (hotCorner->disableWhenFullScreen) {
-        WnckScreen * wnckScreen = wnck_screen_get_default();
-        WnckWindow * activeWindow = wnck_screen_get_active_window(wnckScreen);
-        if (wnck_window_is_fullscreen(activeWindow)) {
-            return TRUE;
-        }
-    }
 
     if (is_upper_left(hotCorner->monitorInfo, x, y) && hotCorner->upperLeftCallback != NULL) {
         hotCorner->ticket++;
@@ -216,8 +204,7 @@ static void start_polling_mouse_position(HotCorner * hotCorner) {
 static HotCorner * hotCorner_new(XfcePanelPlugin *plugin) {
     HotCorner * hotCorner = g_new0(HotCorner, 1);
     hotCorner->plugin = plugin;
-    hotCorner->icon = xfce_panel_image_new_from_source ("xfce4-display");
-    hotCorner->disableWhenFullScreen = TRUE;
+    hotCorner->icon = gtk_image_new_from_icon_name("video-display", GTK_ICON_SIZE_BUTTON);
     hotCorner->upperLeftCallback  = NULL;
     hotCorner->lowerLeftCallback  = NULL;
     hotCorner->upperRightCallback = NULL;
@@ -256,7 +243,7 @@ ActionCallback get_action_callback(GtkComboBox * comboBox, int * outSelected) {
 static void set_new_entry_visibility(GtkComboBox * comboBox, GtkWidget * entry) {
     gint selected = gtk_combo_box_get_active(comboBox);
 
-    if (selected != 5) {
+    if (command_text_callback_map[selected].entry_cb != run_custom_command) {
         gtk_widget_set_no_show_all(entry, TRUE);
         gtk_widget_hide(entry);
     } else {
@@ -305,26 +292,24 @@ static void on_combo_box_changed(GtkComboBox * comboBox, HotCorner * hotCorner) 
 
 }
 
-static GtkWidget * createComboBox(const gchar *name, HotCorner * hotCorner, gint actionID) {
-
-    GtkWidget * vbox = gtk_vbox_new(FALSE, 5);
+static GtkWidget * createComboBox(const gchar *name, HotCorner * hotCorner,
+                                  gint actionID) {
+    GtkWidget * vbox = gtk_vbox_new(FALSE,
+                                    ARRAY_SIZEOF(command_text_callback_map));
     GtkWidget * entry = gtk_entry_new();
     GtkWidget * comboBox = gtk_combo_box_text_new();
+    size_t i;
 
     gtk_widget_set_name(comboBox, name);
     gtk_widget_set_name(entry, name);
 
-
-    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(comboBox), _("-"));
-    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(comboBox), _("Xfdashboard"));
-    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(comboBox), _("Show Desktop"));
-    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(comboBox), _("Start Screensaver"));
-    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(comboBox), _("Turn Off Monitor"));
-    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(comboBox), _("Custom Command"));
+    for (i = 0; i < ARRAY_SIZEOF(command_text_callback_map); i++) {
+        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(comboBox),
+                                       _(command_text_callback_map[i].entry_text));
+    }
 
     gtk_combo_box_set_active(GTK_COMBO_BOX(comboBox), actionID);
     
-    gint selected = gtk_combo_box_get_active(GTK_COMBO_BOX(comboBox));
     set_new_entry_visibility(GTK_COMBO_BOX(comboBox), entry);
 
     gtk_box_pack_start(GTK_BOX(vbox), comboBox, TRUE, FALSE, TRUE);
@@ -352,7 +337,7 @@ static GtkWidget * create_layout(HotCorner * hotCorner) {
     GtkWidget * lowerRightCombo = createComboBox("LOWER_RIGHT", hotCorner, hotCorner->lowerRightActionID);
 
     GtkWidget * emptyLabel = gtk_label_new("");
-    GtkWidget * monitorImage = gtk_image_new_from_icon_name("xfce4-display", GTK_ICON_SIZE_BUTTON);
+    GtkWidget * monitorImage = gtk_image_new_from_icon_name("video-display", GTK_ICON_SIZE_BUTTON);
 
     gtk_image_set_pixel_size(GTK_IMAGE(monitorImage), 256);
 
@@ -380,9 +365,6 @@ static void on_close_configure_window(GtkWidget * dialog, gint response, HotCorn
     gtk_widget_destroy(dialog);
 }
 
-static void setFullScreenDisableFlag(GtkToggleButton *toggleButton, HotCorner * hotCorner) {
-    hotCorner->disableWhenFullScreen = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(toggleButton));
-}
 
 
 static void on_open_configure_window(XfcePanelPlugin * plugin, HotCorner * hotCorner) {
@@ -396,19 +378,14 @@ static void on_open_configure_window(XfcePanelPlugin * plugin, HotCorner * hotCo
     );
 
     GtkWidget * vbox = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
-    GtkWidget * disableInFullScreenCheckbox = gtk_check_button_new_with_label(_("Disable when active window is full screen"));
     GtkWidget * content = create_layout(hotCorner);
 
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(disableInFullScreenCheckbox), hotCorner->disableWhenFullScreen);
-
     gtk_box_pack_start(GTK_BOX(vbox), content, TRUE, FALSE, TRUE);
-    gtk_box_pack_start(GTK_BOX(vbox), disableInFullScreenCheckbox, TRUE, FALSE, TRUE);
 
     gtk_window_set_position (GTK_WINDOW (dialog), GTK_WIN_POS_CENTER);
-    gtk_window_set_icon_name (GTK_WINDOW (dialog), "xfce4-display");
+    gtk_window_set_icon_name (GTK_WINDOW (dialog), "video-display");
 
     g_signal_connect (dialog, "response", G_CALLBACK(on_close_configure_window), hotCorner);
-    g_signal_connect (disableInFullScreenCheckbox, "toggled", G_CALLBACK(setFullScreenDisableFlag), hotCorner);
 
     gtk_widget_show_all(dialog);
 
