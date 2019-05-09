@@ -1,0 +1,52 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Daniel Muñiz Fontoira <dani@damufo.com>, 2019.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: xfdashboard\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-06-30 15:57+0800\n"
+"PO-Revision-Date: 2019-05-09 02:17+0200\n"
+"Language: gl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Last-Translator: \n"
+"Language-Team: Galician <proxecto@trasno.gal>\n"
+"X-Generator: Poedit 1.8.11\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+
+#: hotcorner.c:318
+msgid "-"
+msgstr ""
+
+#: hotcorner.c:323
+msgid "Custom Command"
+msgstr "Orde personalizada"
+
+#: hotcorner.c:399
+msgid "Disable when active window is full screen"
+msgstr "Desactivar cando a xanela activa está a pantalla completa"
+
+#: hotcorner.c:392
+msgid "HotCorner"
+msgstr "Esquinas Activas"
+
+#: hotcorner.c:320
+msgid "Show Desktop"
+msgstr "Amosar escritorio"
+
+#: hotcorner.c:321
+msgid "Start Screensaver"
+msgstr "Comezar o protector de pantalla"
+
+#: hotcorner.c:322
+msgid "Turn Off Monitor"
+msgstr "Apagar a pantalla"
+
+#: hotcorner.c:319
+msgid "Xfdashboard"
+msgstr ""
