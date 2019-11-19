@@ -38,6 +38,11 @@ struct HotCorner {
   gboolean isExecuted;
 
   GtkWidget * icon;
+  
+  /* panel widgets */
+  GtkWidget       *ebox;
+  GtkWidget       *hvbox;
+  GtkWidget       *label;
 
   GdkRectangle monitorInfo;
 
