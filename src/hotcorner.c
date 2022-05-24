@@ -164,11 +164,12 @@ static void free_data(XfcePanelPlugin *plugin __attribute__((unused)), HotCorner
 }
 
 static gint check_hot_corner_action(HotCorner * hotCorner) {
-    GdkScreen * screen = gtk_widget_get_screen(hotCorner->icon);
-    GdkWindow * window = gdk_screen_get_root_window(screen);
-
+    GdkDisplay *display = gdk_display_get_default ();
+    GdkSeat* seat = gdk_display_get_default_seat(display);
+    GdkDevice* device = gdk_seat_get_pointer(seat);
     gint x, y;
-    gdk_window_get_pointer(window, &x, &y, NULL);
+
+    gdk_device_get_position (device, NULL, &x, &y);
 
     if (hotCorner->disableWhenFullScreen) {
         WnckScreen * wnckScreen = wnck_screen_get_default();
