@@ -42,14 +42,14 @@ void toggle_desktop(int spot, HotCorner * hotCorner) {
 }
 
 void turn_off_monitor(int spot, HotCorner * hotCorner) {
-    system("xset dpms force off");
+    int ret = system("xset dpms force off");
 }
 
 void start_screensaver(int spot, HotCorner * hotCorner) {
-    system("xscreensaver-command -activate");
+    int ret = system("xscreensaver-command -activate");
 }
 
 void start_dashboard(int spot, HotCorner * hotCorenr) {
-    system("xfdashboard");
+    int ret = system("xfdashboard");
 }
 

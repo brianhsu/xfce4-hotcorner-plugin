@@ -26,11 +26,11 @@
 #define LOWER_RIGHT 3
 
 void run_command(const gchar * command) {
-
     gchar * value = g_strstrip(g_strdup(command));
+    int ret;
 
     if (strlen(value) > 0) {
-        system(value);
+        ret = system(value);
     }
 
     g_free(value);
@@ -394,7 +394,7 @@ static void on_open_configure_window(XfcePanelPlugin * plugin, HotCorner * hotCo
         _("HotCorner"),
         GTK_WINDOW (gtk_widget_get_toplevel (GTK_WIDGET (hotCorner->plugin))),
         GTK_DIALOG_DESTROY_WITH_PARENT,
-        "window-close", GTK_RESPONSE_OK, NULL
+        _("Close"), GTK_RESPONSE_OK, NULL
     );
 
     GtkWidget * vbox = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
