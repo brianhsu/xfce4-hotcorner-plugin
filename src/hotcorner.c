@@ -439,5 +439,5 @@ static void constructor(XfcePanelPlugin *plugin) {
 
 }
 
-XFCE_PANEL_PLUGIN_REGISTER_INTERNAL(constructor);
+XFCE_PANEL_PLUGIN_REGISTER(constructor);
 

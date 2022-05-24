@@ -19,6 +19,7 @@
 #ifndef __HOTCORNER_PLUGIN__
 #define __HOTCORNER_PLUGIN__
 
+#include <libxfce4panel/libxfce4panel.h>
 #include <libxfce4panel/xfce-panel-plugin.h>
 #include <libxfce4ui/libxfce4ui.h>
 #include <libwnck/libwnck.h>
