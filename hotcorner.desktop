@@ -6,6 +6,7 @@ Name[zh_TW]=螢幕熱點
 Comment=HotCorner
 Comment[zh_TW]=螢幕熱點
 Icon=xfce4-display
+X-XFCE-API=2.0
 X-XFCE-Module=hotcorner
 X-XFCE-Unique=true
 X-XFCE-Module-Path=/usr/share/xfce4/panel/plugins/
