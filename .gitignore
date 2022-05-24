@@ -5,3 +5,4 @@ libhotcorner.so
 Makefile
 *.swp
 install_manifest.txt
+*.gmo
