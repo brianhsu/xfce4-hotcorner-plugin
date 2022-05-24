@@ -242,9 +242,11 @@ static HotCorner * hotCorner_new(XfcePanelPlugin *plugin) {
 
 static void set_monitor_size(HotCorner * hotCorner) {
     GdkScreen * screen = gdk_screen_get_default();
+    GdkDisplay *display = gdk_display_get_default();
+    GdkMonitor *monitorID = gdk_display_get_primary_monitor(display);
     GdkRectangle monitorInfo;
-    gint monitorID = gdk_screen_get_primary_monitor(screen);
-    gdk_screen_get_monitor_geometry (screen, monitorID, &monitorInfo);
+
+    gdk_monitor_get_geometry (monitorID, &monitorInfo);
     hotCorner->monitorInfo = monitorInfo;
 }
 
@@ -307,7 +309,7 @@ static void on_combo_box_changed(GtkComboBox * comboBox, HotCorner * hotCorner) 
 
 static GtkWidget * createComboBox(const gchar *name, HotCorner * hotCorner, gint actionID) {
 
-    GtkWidget * vbox = gtk_vbox_new(FALSE, 5);
+    GtkWidget * vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
     GtkWidget * entry = gtk_entry_new();
     GtkWidget * comboBox = gtk_combo_box_text_new();
 
@@ -341,10 +343,10 @@ static GtkWidget * createComboBox(const gchar *name, HotCorner * hotCorner, gint
 
 static GtkWidget * create_layout(HotCorner * hotCorner) {
 
-    GtkWidget * vbox = gtk_vbox_new(FALSE, 10);
-    GtkWidget * row1 = gtk_hbox_new(FALSE, 10);
-    GtkWidget * row2 = gtk_hbox_new(FALSE, 10);
-    GtkWidget * row3 = gtk_hbox_new(FALSE, 10);
+    GtkWidget * vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
+    GtkWidget * row1 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
+    GtkWidget * row2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
+    GtkWidget * row3 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
 
     GtkWidget * upperLeftCombo  = createComboBox("UPPER_LEFT", hotCorner, hotCorner->upperLeftActionID);
     GtkWidget * upperRightCombo = createComboBox("UPPER_RIGHT", hotCorner, hotCorner->upperRightActionID);
@@ -392,7 +394,7 @@ static void on_open_configure_window(XfcePanelPlugin * plugin, HotCorner * hotCo
         _("HotCorner"),
         GTK_WINDOW (gtk_widget_get_toplevel (GTK_WIDGET (hotCorner->plugin))),
         GTK_DIALOG_DESTROY_WITH_PARENT,
-        GTK_STOCK_CLOSE, GTK_RESPONSE_OK, NULL
+        "window-close", GTK_RESPONSE_OK, NULL
     );
 
     GtkWidget * vbox = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
