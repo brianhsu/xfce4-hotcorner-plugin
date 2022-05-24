@@ -31,6 +31,9 @@ void run_command(const gchar * command) {
 
     if (strlen(value) > 0) {
         ret = system(value);
+	if (ret < 0) {
+		/* send error notification here */
+	}
     }
 
     g_free(value);
@@ -80,6 +83,7 @@ ActionCallback get_action_callback_from_index(int index, int * outSelected) {
             return run_custom_command;
     }
 
+    return NULL;
 }
 
 static void read_config_file(XfcePanelPlugin * plugin, HotCorner * hotCorner) {
@@ -150,7 +154,7 @@ static void save_config_file(XfcePanelPlugin * plugin, HotCorner * hotCorner) {
 }
 
 
-static void free_data(XfcePanelPlugin *plugin, HotCorner * hotCorner) {
+static void free_data(XfcePanelPlugin *plugin __attribute__((unused)), HotCorner * hotCorner) {
     if (hotCorner->timeout_id != 0) {
         g_source_remove (hotCorner->timeout_id);
     }
@@ -162,7 +166,7 @@ static void free_data(XfcePanelPlugin *plugin, HotCorner * hotCorner) {
 static gint check_hot_corner_action(HotCorner * hotCorner) {
     GdkScreen * screen = gtk_widget_get_screen(hotCorner->icon);
     GdkWindow * window = gdk_screen_get_root_window(screen);
-    GdkDisplay * display = gtk_widget_get_display(hotCorner->icon);
+
     gint x, y;
     gdk_window_get_pointer(window, &x, &y, NULL);
 
@@ -241,7 +245,6 @@ static HotCorner * hotCorner_new(XfcePanelPlugin *plugin) {
 }
 
 static void set_monitor_size(HotCorner * hotCorner) {
-    GdkScreen * screen = gdk_screen_get_default();
     GdkDisplay *display = gdk_display_get_default();
     GdkMonitor *monitorID = gdk_display_get_primary_monitor(display);
     GdkRectangle monitorInfo;
@@ -326,7 +329,6 @@ static GtkWidget * createComboBox(const gchar *name, HotCorner * hotCorner, gint
 
     gtk_combo_box_set_active(GTK_COMBO_BOX(comboBox), actionID);
     
-    gint selected = gtk_combo_box_get_active(GTK_COMBO_BOX(comboBox));
     set_new_entry_visibility(GTK_COMBO_BOX(comboBox), entry);
 
     gtk_box_pack_start(GTK_BOX(vbox), comboBox, TRUE, FALSE, TRUE);
@@ -376,7 +378,7 @@ static GtkWidget * create_layout(HotCorner * hotCorner) {
     return vbox;
 }
 
-static void on_close_configure_window(GtkWidget * dialog, gint response, HotCorner * hotCorner) {
+static void on_close_configure_window(GtkWidget * dialog, gint response __attribute__((unused)), HotCorner * hotCorner) {
     xfce_panel_plugin_unblock_menu(hotCorner->plugin);
     save_config_file(hotCorner->plugin, hotCorner);
     gtk_widget_destroy(dialog);
@@ -417,7 +419,7 @@ static void on_open_configure_window(XfcePanelPlugin * plugin, HotCorner * hotCo
 }
 
 
-static void on_screen_changed(GtkWidget * widget, GdkScreen * previous_screen, HotCorner * hotCorner) {
+static void on_screen_changed(GtkWidget * widget __attribute__((unused)), GdkScreen * previous_screen __attribute__((unused)), HotCorner * hotCorner) {
     set_monitor_size(hotCorner);
 }
 
