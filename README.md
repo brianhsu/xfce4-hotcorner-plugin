@@ -1,6 +1,12 @@
 XFCE4 HotCorner Panel Plugin
 ==============================
 
+Please use other's fork
+------------------------
+
+I've not use XFCE4 for a long time. So this project is abandoned and I won't maintain it anymore.
+If you are seeking for a more useable, updated version, please check https://github.com/christopherkobayashi/xfce4-hotcorner-plugin
+
 Introduction
 --------------
 
