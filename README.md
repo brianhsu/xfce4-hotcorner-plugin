@@ -17,7 +17,6 @@ Currently it supports the following operations on the primary display:
 Screenshot
 ------------------------
  ![Screenshot](doc/screenshot.png?raw=true "Screenshot")
- ![Screenshot](http://i.imgur.com/575haSy.png)
 
 Prerequisite
 ------------------------
