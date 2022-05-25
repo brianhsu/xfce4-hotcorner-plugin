@@ -4,9 +4,9 @@ XFCE4 HotCorner Panel Plugin
 Introduction
 --------------
 
-This is aim to provide an easy to use xfce4 panel plugin that let users set hot corner action.
+Allow users to set AfterDark-like hot corner actions.
 
-Currently it supports the following operation in primary display:
+Currently it supports the following operations on the primary display:
 
   - xfdashboard
   - toggle desktop
@@ -16,7 +16,7 @@ Currently it supports the following operation in primary display:
 
 Screenshot
 ------------------------
-
+ ![Screenshot](doc/screenshot.png?raw=true "Screenshot")
  ![Screenshot](http://i.imgur.com/575haSy.png)
 
 Prerequisite
@@ -30,7 +30,7 @@ Compile & Installation
 -------------------------
 
 ```console
-  git clone git://github.com/brianhsu/xfce4-hotcorner-plugin.git
+  git clone git://github.com/christopherkobayashi/xfce4-hotcorner-plugin.git
   cd xfce4-hotcorner-plugin
   cmake -DCMAKE_INSTALL_PREFIX=/usr .
   make install
@@ -40,10 +40,7 @@ Installation
 ----------------------
 
   - ArchLinux AUR: 
-    - https://aur4.archlinux.org/packages/xfce4-hotcorner-plugin
-
-  - Gentoo Ebuild: 
-    - https://gist.github.com/brianhsu/637a906e9a1e17ca6392
+    - https://aur.archlinux.org/packages/xfce4-hotcorner-plugin
 
 License
 -----------
